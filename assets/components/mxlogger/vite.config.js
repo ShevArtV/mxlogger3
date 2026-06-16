@@ -15,11 +15,9 @@ export default defineConfig({
                 entryFileNames: '[name].min.js',
                 chunkFileNames: '[name].min.js',
                 assetFileNames: '[name].[ext]',
-                manualChunks: (id) => {
-                    if (id.includes('node_modules')) {
-                        return 'vendor';
-                    }
-                },
+                // Один файл (без вендор-сплита): имя статичное, cache-bust по ?v=mtime
+                // в контроллере надёжно сбрасывает кэш при каждой пересборке.
+                inlineDynamicImports: true,
             },
         },
     },

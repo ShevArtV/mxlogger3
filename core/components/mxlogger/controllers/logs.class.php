@@ -43,9 +43,11 @@ class MxloggerlogsManagerController extends modExtraManagerController
         $json = json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $this->modx->regClientStartupHTMLBlock("<script>window.MxLoggerConfig = {$json};</script>");
 
-        $ver = $this->modx->getOption('mxlogger.version', null, '1.0.0');
+        // Cache-bust по mtime бандла — каждая пересборка автоматически сбрасывает кэш.
+        $bundle = MODX_ASSETS_PATH . 'components/mxlogger/js/mgr/vue-dist/logs.min.js';
+        $ver = @filemtime($bundle) ?: $this->modx->getOption('mxlogger.version', null, '1.0.0');
         $this->modx->regClientStartupHTMLBlock(
-            '<script type="module" src="' . $assetsUrl . 'js/mgr/vue-dist/logs.min.js?v=' . rawurlencode($ver) . '"></script>'
+            '<script type="module" src="' . $assetsUrl . 'js/mgr/vue-dist/logs.min.js?v=' . rawurlencode((string) $ver) . '"></script>'
         );
     }
 

@@ -6,6 +6,7 @@ import Tag from 'primevue/tag';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Select from 'primevue/select';
+import MultiSelect from 'primevue/multiselect';
 import DatePicker from 'primevue/datepicker';
 import Dialog from 'primevue/dialog';
 import Toast from 'primevue/toast';
@@ -34,8 +35,8 @@ const levels = [
 ];
 
 const filters = reactive({
-    tags: '',
-    tags_match: 'any',
+    tags: [], // массив выбранных тэгов (multi-select с чекбоксами)
+    tags_match: 'all', // как на двойке: выбрано несколько → AND
     level: '',
     process_uid: '',
     ident: '',
@@ -43,7 +44,13 @@ const filters = reactive({
     dates: null, // [from, to]
 });
 
+const tagOptions = ref([]);
 const detail = reactive({ open: false, loading: false, data: null });
+
+async function loadTags() {
+    const res = await LogApi.getTags('');
+    tagOptions.value = (res && res.results) ? res.results : [];
+}
 
 const severity = (level) => ({ error: 'danger', warning: 'warn', info: 'info', debug: 'secondary' }[level] || 'contrast');
 
@@ -61,7 +68,7 @@ function buildParams() {
         dir: sortOrder.value === 1 ? 'ASC' : 'DESC',
         tags_match: filters.tags_match,
     };
-    if (filters.tags) p.tags = filters.tags;
+    if (Array.isArray(filters.tags) && filters.tags.length) p.tags = filters.tags.join(',');
     if (filters.level) p.level = filters.level;
     if (filters.process_uid) p.process_uid = filters.process_uid;
     if (filters.ident) p.ident = filters.ident;
@@ -95,13 +102,18 @@ function applyFilters() {
 }
 
 function resetFilters() {
-    filters.tags = '';
+    filters.tags = [];
     filters.level = '';
     filters.process_uid = '';
     filters.ident = '';
     filters.query = '';
     filters.dates = null;
     applyFilters();
+}
+
+function refresh() {
+    load();
+    loadTags();
 }
 
 function onPage(e) {
@@ -127,7 +139,8 @@ async function openDetail(row) {
 }
 
 function filterByTag(tag) {
-    filters.tags = tag;
+    if (!Array.isArray(filters.tags)) filters.tags = [];
+    if (!filters.tags.includes(tag)) filters.tags = [...filters.tags, tag];
     applyFilters();
 }
 
@@ -157,6 +170,7 @@ function clearLog(event) {
                 toast.add({ severity: 'success', summary: 'Готово', detail: res.message || 'Журнал очищен', life: 4000 });
                 first.value = 0;
                 load();
+                loadTags();
             } else {
                 toast.add({ severity: 'error', summary: 'Ошибка', detail: (res && res.message) || 'Не удалось очистить', life: 5000 });
             }
@@ -164,7 +178,10 @@ function clearLog(event) {
     });
 }
 
-onMounted(() => load());
+onMounted(() => {
+    load();
+    loadTags();
+});
 </script>
 
 <template>
@@ -173,8 +190,11 @@ onMounted(() => load());
         <ConfirmPopup />
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-            <InputText v-model="filters.tags" placeholder="Тэги (через запятую)" style="width:180px"
-                @keyup.enter="applyFilters" />
+            <MultiSelect v-model="filters.tags" :options="tagOptions" optionLabel="tag" optionValue="tag"
+                placeholder="Тэги" display="chip" filter :showToggleAll="false" :maxSelectedLabels="4"
+                :selectedItemsLabel="'{0} тэгов'" style="width:240px" @change="applyFilters">
+                <template #empty>Тэгов пока нет</template>
+            </MultiSelect>
             <Select v-model="filters.level" :options="levels" optionLabel="label" optionValue="value"
                 placeholder="Уровень" style="width:140px" />
             <InputText v-model="filters.process_uid" placeholder="Process UID" style="width:160px"
@@ -188,7 +208,7 @@ onMounted(() => load());
             <Button label="Показать" icon="pi pi-search" @click="applyFilters" />
             <Button label="Сброс" icon="pi pi-times" severity="secondary" outlined @click="resetFilters" />
             <span style="flex:1"></span>
-            <Button label="Обновить" icon="pi pi-refresh" severity="secondary" text @click="load" />
+            <Button label="Обновить" icon="pi pi-refresh" severity="secondary" text @click="refresh" />
             <Button label="Очистить журнал" icon="pi pi-trash" severity="danger" outlined @click="clearLog" />
         </div>
 
