@@ -19,6 +19,10 @@ class Clear extends Processor
 
     public function process()
     {
+        // Гарантируем загрузку топика — через коннектор run() не всегда успевает
+        // подгрузить его до process(), и lexicon() возвращал бы голый ключ.
+        $this->modx->lexicon->load('mxlogger:default');
+
         $where = [];
 
         $clause = TagFilter::clause(
