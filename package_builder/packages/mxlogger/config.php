@@ -19,6 +19,7 @@ return [
         'events' => 'elements/events.php',
         'snippets' => 'elements/snippets.php',
         'plugins' => 'elements/plugins.php',
+        'menus' => 'elements/menus.php',
     ],
 
     'static' => [
@@ -42,6 +43,7 @@ return [
             'plugins' => true,
             'settings' => false,
             'events' => true,
+            'menus' => true,
         ],
     ],
 ];

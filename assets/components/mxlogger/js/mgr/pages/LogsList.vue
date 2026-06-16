@@ -1,0 +1,277 @@
+<script setup>
+import { ref, reactive, onMounted } from 'vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tag from 'primevue/tag';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import Select from 'primevue/select';
+import DatePicker from 'primevue/datepicker';
+import Dialog from 'primevue/dialog';
+import Toast from 'primevue/toast';
+import ConfirmPopup from 'primevue/confirmpopup';
+import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import { LogApi } from '../api/connector.js';
+
+const toast = useToast();
+const confirm = useConfirm();
+
+const rows = ref([]);
+const total = ref(0);
+const loading = ref(false);
+const first = ref(0);
+const limit = ref(50);
+const sortField = ref('createdon');
+const sortOrder = ref(-1); // -1 DESC, 1 ASC
+
+const levels = [
+    { label: 'Все уровни', value: '' },
+    { label: 'debug', value: 'debug' },
+    { label: 'info', value: 'info' },
+    { label: 'warning', value: 'warning' },
+    { label: 'error', value: 'error' },
+];
+
+const filters = reactive({
+    tags: '',
+    tags_match: 'any',
+    level: '',
+    process_uid: '',
+    ident: '',
+    query: '',
+    dates: null, // [from, to]
+});
+
+const detail = reactive({ open: false, loading: false, data: null });
+
+const severity = (level) => ({ error: 'danger', warning: 'warn', info: 'info', debug: 'secondary' }[level] || 'contrast');
+
+function fmtDate(d) {
+    if (!d) return '';
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+function buildParams() {
+    const p = {
+        start: first.value,
+        limit: limit.value,
+        sort: sortField.value || 'createdon',
+        dir: sortOrder.value === 1 ? 'ASC' : 'DESC',
+        tags_match: filters.tags_match,
+    };
+    if (filters.tags) p.tags = filters.tags;
+    if (filters.level) p.level = filters.level;
+    if (filters.process_uid) p.process_uid = filters.process_uid;
+    if (filters.ident) p.ident = filters.ident;
+    if (filters.query) p.query = filters.query;
+    if (Array.isArray(filters.dates)) {
+        if (filters.dates[0]) p.date_from = fmtDate(filters.dates[0]);
+        if (filters.dates[1]) p.date_to = fmtDate(filters.dates[1]);
+    }
+    return p;
+}
+
+async function load() {
+    loading.value = true;
+    const res = await LogApi.getList(buildParams());
+    loading.value = false;
+    if (res && (res.results || res.object)) {
+        rows.value = res.results || res.object || [];
+        total.value = res.total || 0;
+    } else {
+        rows.value = [];
+        total.value = 0;
+        if (res && res.message) {
+            toast.add({ severity: 'error', summary: 'Ошибка', detail: res.message, life: 5000 });
+        }
+    }
+}
+
+function applyFilters() {
+    first.value = 0;
+    load();
+}
+
+function resetFilters() {
+    filters.tags = '';
+    filters.level = '';
+    filters.process_uid = '';
+    filters.ident = '';
+    filters.query = '';
+    filters.dates = null;
+    applyFilters();
+}
+
+function onPage(e) {
+    first.value = e.first;
+    limit.value = e.rows;
+    load();
+}
+
+function onSort(e) {
+    sortField.value = e.sortField || 'createdon';
+    sortOrder.value = e.sortOrder || -1;
+    first.value = 0;
+    load();
+}
+
+async function openDetail(row) {
+    detail.open = true;
+    detail.loading = true;
+    detail.data = null;
+    const res = await LogApi.get(row.id);
+    detail.loading = false;
+    detail.data = (res && res.object) ? res.object : row;
+}
+
+function filterByTag(tag) {
+    filters.tags = tag;
+    applyFilters();
+}
+
+function filterByProcess(uid) {
+    if (!uid) return;
+    filters.process_uid = uid;
+    applyFilters();
+}
+
+function clearLog(event) {
+    const params = buildParams();
+    delete params.start;
+    delete params.limit;
+    delete params.sort;
+    delete params.dir;
+    const hasFilters = Object.keys(params).some((k) => k !== 'tags_match' && params[k]);
+    confirm.require({
+        target: event.currentTarget,
+        message: hasFilters ? 'Удалить записи по текущим фильтрам?' : 'Очистить ВЕСЬ журнал?',
+        icon: 'pi pi-exclamation-triangle',
+        rejectLabel: 'Отмена',
+        acceptLabel: 'Удалить',
+        acceptClass: 'p-button-danger',
+        accept: async () => {
+            const res = await LogApi.clear(params);
+            if (res && res.success) {
+                toast.add({ severity: 'success', summary: 'Готово', detail: res.message || 'Журнал очищен', life: 4000 });
+                first.value = 0;
+                load();
+            } else {
+                toast.add({ severity: 'error', summary: 'Ошибка', detail: (res && res.message) || 'Не удалось очистить', life: 5000 });
+            }
+        },
+    });
+}
+
+onMounted(() => load());
+</script>
+
+<template>
+    <div style="padding:12px">
+        <Toast />
+        <ConfirmPopup />
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+            <InputText v-model="filters.tags" placeholder="Тэги (через запятую)" style="width:180px"
+                @keyup.enter="applyFilters" />
+            <Select v-model="filters.level" :options="levels" optionLabel="label" optionValue="value"
+                placeholder="Уровень" style="width:140px" />
+            <InputText v-model="filters.process_uid" placeholder="Process UID" style="width:160px"
+                @keyup.enter="applyFilters" />
+            <InputText v-model="filters.ident" placeholder="Польз./сессия/IP" style="width:160px"
+                @keyup.enter="applyFilters" />
+            <DatePicker v-model="filters.dates" selectionMode="range" showTime hourFormat="24"
+                dateFormat="yy-mm-dd" placeholder="Период" style="width:230px" :manualInput="false" />
+            <InputText v-model="filters.query" placeholder="Поиск по тексту/источнику" style="width:220px"
+                @keyup.enter="applyFilters" />
+            <Button label="Показать" icon="pi pi-search" @click="applyFilters" />
+            <Button label="Сброс" icon="pi pi-times" severity="secondary" outlined @click="resetFilters" />
+            <span style="flex:1"></span>
+            <Button label="Обновить" icon="pi pi-refresh" severity="secondary" text @click="load" />
+            <Button label="Очистить журнал" icon="pi pi-trash" severity="danger" outlined @click="clearLog" />
+        </div>
+
+        <DataTable :value="rows" :loading="loading" lazy paginator :rows="limit" :first="first"
+            :totalRecords="total" :rowsPerPageOptions="[25, 50, 100, 200]" dataKey="id"
+            :sortField="sortField" :sortOrder="sortOrder" @page="onPage" @sort="onSort"
+            removableSort size="small" stripedRows scrollable scrollHeight="flex"
+            paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+            currentPageReportTemplate="{first}–{last} из {totalRecords}">
+            <template #empty>
+                <div style="padding:16px;color:#888">Записей нет. Измените фильтры или дождитесь логов.</div>
+            </template>
+
+            <Column field="createdon" header="Время" sortable style="width:150px">
+                <template #body="{ data }"><tt>{{ data.createdon_formatted }}</tt></template>
+            </Column>
+            <Column field="level" header="Ур." sortable style="width:90px">
+                <template #body="{ data }">
+                    <Tag :value="data.level" :severity="severity(data.level)" />
+                </template>
+            </Column>
+            <Column header="Тэги" style="width:160px">
+                <template #body="{ data }">
+                    <Tag v-for="t in data.tags_list" :key="t" :value="t" severity="secondary"
+                        style="margin:1px;cursor:pointer" @click="filterByTag(t)" />
+                </template>
+            </Column>
+            <Column field="process_uid" header="Процесс" style="width:120px">
+                <template #body="{ data }">
+                    <span v-if="data.process_uid" style="cursor:pointer;font-family:monospace;font-size:11px"
+                        title="Фильтровать по процессу" @click="filterByProcess(data.process_uid)">
+                        {{ data.process_uid }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="message" header="Сообщение">
+                <template #body="{ data }">
+                    <span style="cursor:pointer" @click="openDetail(data)">{{ data.message_short }}</span>
+                </template>
+            </Column>
+            <Column header="Источник" style="width:240px">
+                <template #body="{ data }">
+                    <span style="font-family:monospace;font-size:11px">{{ data.caller }}</span><br>
+                    <span style="color:#999;font-size:11px">{{ data.source }}</span>
+                </template>
+            </Column>
+            <Column header="Польз./IP" style="width:130px">
+                <template #body="{ data }">
+                    <span>{{ data.username || data.user_id }}</span><br>
+                    <span style="color:#999;font-size:11px">{{ data.ip }}</span>
+                </template>
+            </Column>
+            <Column style="width:60px">
+                <template #body="{ data }">
+                    <Button icon="pi pi-eye" text rounded size="small" @click="openDetail(data)" />
+                </template>
+            </Column>
+        </DataTable>
+
+        <Dialog v-model:visible="detail.open" modal header="Запись лога" :style="{ width: '720px' }"
+            :breakpoints="{ '960px': '90vw' }">
+            <div v-if="detail.loading" style="padding:24px;text-align:center">Загрузка…</div>
+            <div v-else-if="detail.data">
+                <div style="margin-bottom:8px">
+                    <Tag :value="detail.data.level" :severity="severity(detail.data.level)" />
+                    <Tag v-for="t in detail.data.tags_list" :key="t" :value="t" severity="secondary" style="margin-left:4px" />
+                    <span style="float:right;color:#999"><tt>{{ detail.data.createdon_formatted }}</tt></span>
+                </div>
+                <p style="font-weight:600;font-size:15px;margin:8px 0">{{ detail.data.message }}</p>
+                <div style="color:#777;font-size:12px;font-family:monospace;margin-bottom:10px">
+                    @ {{ detail.data.caller || '—' }} ({{ detail.data.source }})<br>
+                    uid={{ detail.data.process_uid }} · user={{ detail.data.username || detail.data.user_id }} ·
+                    session={{ detail.data.session_id }} · ip={{ detail.data.ip }}
+                </div>
+                <template v-if="detail.data.context_pretty">
+                    <div style="font-weight:600;color:#2f8fd6;margin-top:8px">Контекст</div>
+                    <pre style="background:#1e2329;color:#d6dee6;padding:8px;border-radius:4px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:12px">{{ detail.data.context_pretty }}</pre>
+                </template>
+                <template v-if="detail.data.trace_pretty">
+                    <div style="font-weight:600;color:#2f8fd6;margin-top:8px">Стэк и параметры</div>
+                    <pre style="background:#1e2329;color:#d6dee6;padding:8px;border-radius:4px;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:12px">{{ detail.data.trace_pretty }}</pre>
+                </template>
+            </div>
+        </Dialog>
+    </div>
+</template>

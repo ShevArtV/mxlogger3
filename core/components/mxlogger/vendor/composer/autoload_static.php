@@ -22,10 +22,18 @@ class ComposerStaticInit570ff20e8c3724ec1770fbfdfce8c1e0
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'MxLogger\\Controllers\\Mgr\\Logs' => __DIR__ . '/../..' . '/src/Controllers/Mgr/Logs.php',
+        'MxLogger\\Controllers\\Mgr\\MxLoggerManagerController' => __DIR__ . '/../..' . '/src/Controllers/Mgr/MxLoggerManagerController.php',
+        'MxLogger\\Helpers\\TagFilter' => __DIR__ . '/../..' . '/src/Helpers/TagFilter.php',
         'MxLogger\\Model\\MxLoggerLog' => __DIR__ . '/../..' . '/src/Model/MxLoggerLog.php',
         'MxLogger\\Model\\mysql\\MxLoggerLog' => __DIR__ . '/../..' . '/src/Model/mysql/MxLoggerLog.php',
         'MxLogger\\MxLogger' => __DIR__ . '/../..' . '/src/MxLogger.php',
         'MxLogger\\MxLoggerProcess' => __DIR__ . '/../..' . '/src/MxLoggerProcess.php',
+        'MxLogger\\Processors\\Mgr\\Log\\Clear' => __DIR__ . '/../..' . '/src/Processors/Mgr/Log/Clear.php',
+        'MxLogger\\Processors\\Mgr\\Log\\Get' => __DIR__ . '/../..' . '/src/Processors/Mgr/Log/Get.php',
+        'MxLogger\\Processors\\Mgr\\Log\\GetList' => __DIR__ . '/../..' . '/src/Processors/Mgr/Log/GetList.php',
+        'MxLogger\\Processors\\Mgr\\Log\\GetTags' => __DIR__ . '/../..' . '/src/Processors/Mgr/Log/GetTags.php',
+        'MxLogger\\Processors\\Mgr\\Log\\Remove' => __DIR__ . '/../..' . '/src/Processors/Mgr/Log/Remove.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
