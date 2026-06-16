@@ -256,22 +256,16 @@ onMounted(() => {
             </Column>
             <Column header="Тэги" style="width:160px">
                 <template #body="{ data }">
-                    <Tag v-for="t in data.tags_list" :key="t" :value="t" severity="secondary"
-                        style="margin:1px;cursor:pointer" @click="filterByTag(t)" />
+                    <Tag v-for="t in data.tags_list" :key="t" :value="t" severity="secondary" style="margin:1px" />
                 </template>
             </Column>
             <Column field="process_uid" header="Процесс" style="width:120px">
                 <template #body="{ data }">
-                    <span v-if="data.process_uid" style="cursor:pointer;font-family:monospace;font-size:11px"
-                        title="Фильтровать по процессу" @click="filterByProcess(data.process_uid)">
-                        {{ data.process_uid }}
-                    </span>
+                    <span v-if="data.process_uid" style="font-family:monospace;font-size:11px">{{ data.process_uid }}</span>
                 </template>
             </Column>
             <Column field="message" header="Сообщение" style="width:260px">
-                <template #body="{ data }">
-                    <span style="cursor:pointer" @click="openDetail(data)">{{ data.message_short }}</span>
-                </template>
+                <template #body="{ data }">{{ data.message_short }}</template>
             </Column>
             <Column header="Источник" style="min-width:340px">
                 <template #body="{ data }">
