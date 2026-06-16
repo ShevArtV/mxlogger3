@@ -497,7 +497,19 @@ class MxLogger
         if ($fn === 'invokeEvent') {
             return true;
         }
-        return in_array($cls . '::' . $fn, $this->noiseFrames, true);
+        if (in_array($cls . '::' . $fn, $this->noiseFrames, true)) {
+            return true;
+        }
+        // В MODX 3 диспетчерские классы namespaced (MODX\Revolution\modScript и т.п.) —
+        // сравниваем и по короткому имени класса, чтобы skip-список работал и в 2, и в 3.
+        if ($cls !== '') {
+            $pos = strrpos($cls, '\\');
+            $short = $pos === false ? $cls : substr($cls, $pos + 1);
+            if ($short !== $cls && in_array($short . '::' . $fn, $this->noiseFrames, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function resolveCaptureMode(string $level, array $options): string
