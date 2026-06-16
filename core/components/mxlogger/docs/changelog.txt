@@ -1,0 +1,49 @@
+Changelog for mxLogger (MODX 3).
+
+mxLogger 1.0.0-pl (2026-06-17)
+==============================
+Порт mxLogger с MODX 2 на MODX 3 (xPDO 3, PHP 8.1+). Перенесён весь функционал двойки.
+
+Ядро (сервис и модель):
+- Сервис-классы MxLogger\MxLogger и MxLogger\MxLoggerProcess (PSR-4, namespaced):
+  log/debug/info/warning/error, скоуп процесса process() с общим process_uid.
+- Доступ к сервису через DI-контейнер: $modx->services->get('mxlogger')
+  (замена extension_packages из двойки). bootstrap.php регистрирует сервис и
+  xPDO-пакет модели MxLogger\Model.
+- Модель MxLoggerLog (xPDO 3, schema version 3.0): tags, process_uid, level,
+  message, context(JSON), class, function, file, line, trace(JSON), user_id,
+  session_id, ip, createdon. Мультитэги — CSV-колонка tags с FULLTEXT-индексом;
+  фильтр any/all, режим mxlogger.tag_filter_mode (auto/fulltext/like).
+- Автозахват «Источника» (class/function/file/line) и стэка с параметрами;
+  объекты сворачиваются в object(Класс). Диспетчерские кадры фреймворка
+  пропускаются — в т.ч. namespaced MODX 3 (MODX\Revolution\modScript::process,
+  *::invokeEvent, include/eval) — поэтому источник указывает на реальный код.
+- Опция skip_classes (классы-прокладки фасадов над логгером), whitelist-фильтры
+  записи (пользователь/группа/сессия/кука), события mxlOnBeforeLogSave /
+  mxlOnAfterLogSave.
+- Резолвер таблицы приводит mxlogger_log к utf8mb4 с порога (иначе кириллица
+  падала бы с «1366 Incorrect string value»).
+
+Менеджерный интерфейс (CMP):
+- Грид логов переписан на Vue 3 + PrimeVue 4 (тема Aura, styled-mode) + Vite
+  (вместо ExtJS двойки). Фильтры по тэгу (мультиселект с чекбоксами), уровню,
+  процессу, пользователю/сессии/IP, периоду, тексту — применяются автоматически.
+  Двойной клик по строке открывает окно детали (таблица полей + клик по значению
+  заполняет фильтр; контекст и стэк — во вкладках). Очистка журнала по фильтру.
+- Контроллер страницы — core/components/mxlogger/controllers/logs.class.php
+  (файловый механизм MODX 3: ucfirst(namespace).action.'ManagerController').
+- Процессоры MxLogger\Processors\Mgr\Log\{GetList,Get,GetTags,Clear,Remove},
+  коннектор assets/.../connector.php (action = FQCN процессора).
+
+Сниппет, плагины, break-glass:
+- Сниппет mxLogger — запись лога из чанка/Fenom.
+- Плагин mxLoggerRotate (OnMODXInit) — ротация старых записей по mxlogger.log_lifetime.
+- Плагин mxLoggerMiniShop3 (static) — логирование событий miniShop3: корзина
+  (тэг cart), заказ (тэг order), сквозной purchase, воронка по сессии. Параметры
+  событий ms3 (product_key, msOrder и т.п.) читаются из $modx->event->params.
+  Аргументы метода в trace не пишутся (trace=caller) — чтобы не утекали ПДн/токен
+  заказа при capture_mode=full. ms3 трактует непустой возврат плагина как ошибку —
+  плагин всегда возвращает пусто. Требует установленного miniShop3.
+- standalone.php — просмотр логов в обход MODX (CLI всегда; web по ключу), читает
+  БД напрямую через PDO. Имена колонок в SELECT забэктикованы (MariaDB строга к
+  function/line).
