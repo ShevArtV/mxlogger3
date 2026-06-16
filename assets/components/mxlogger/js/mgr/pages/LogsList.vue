@@ -239,7 +239,7 @@ onMounted(() => {
             :totalRecords="total" :rowsPerPageOptions="[25, 50, 100, 200]" dataKey="id"
             :sortField="sortField" :sortOrder="sortOrder" @page="onPage" @sort="onSort"
             @rowDblclick="(e) => openDetail(e.data)" rowHover
-            removableSort size="small" stripedRows scrollable scrollHeight="flex"
+            removableSort size="small" stripedRows scrollable scrollHeight="calc(100vh - 270px)"
             paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="{first}–{last} из {totalRecords}">
             <template #empty>
