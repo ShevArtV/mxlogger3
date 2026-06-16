@@ -189,21 +189,21 @@ onMounted(() => {
         <Toast />
         <ConfirmPopup />
 
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;width:100%">
             <MultiSelect v-model="filters.tags" :options="tagOptions" optionLabel="tag" optionValue="tag"
                 placeholder="Тэги" display="chip" filter :showToggleAll="false" :maxSelectedLabels="4"
-                :selectedItemsLabel="'{0} тэгов'" style="width:240px" @change="applyFilters">
+                :selectedItemsLabel="'{0} тэгов'" style="flex:1 1 200px;min-width:160px" @change="applyFilters">
                 <template #empty>Тэгов пока нет</template>
             </MultiSelect>
             <Select v-model="filters.level" :options="levels" optionLabel="label" optionValue="value"
-                placeholder="Уровень" style="width:140px" />
-            <InputText v-model="filters.process_uid" placeholder="Process UID" style="width:160px"
+                placeholder="Уровень" style="flex:1 1 130px;min-width:120px" />
+            <InputText v-model="filters.process_uid" placeholder="Process UID" style="flex:1 1 150px;min-width:130px"
                 @keyup.enter="applyFilters" />
-            <InputText v-model="filters.ident" placeholder="Польз./сессия/IP" style="width:160px"
+            <InputText v-model="filters.ident" placeholder="Польз./сессия/IP" style="flex:1 1 150px;min-width:130px"
                 @keyup.enter="applyFilters" />
             <DatePicker v-model="filters.dates" selectionMode="range" showTime hourFormat="24"
-                dateFormat="yy-mm-dd" placeholder="Период" style="width:230px" :manualInput="false" />
-            <InputText v-model="filters.query" placeholder="Поиск по тексту/источнику" style="width:220px"
+                dateFormat="yy-mm-dd" placeholder="Период" style="flex:1 1 210px;min-width:190px" :manualInput="false" />
+            <InputText v-model="filters.query" placeholder="Поиск по тексту/источнику" style="flex:2 1 200px;min-width:180px"
                 @keyup.enter="applyFilters" />
         </div>
 
