@@ -106,6 +106,13 @@ function applyFilters() {
     load();
 }
 
+// Текстовые поля применяются с задержкой — чтобы не слать запрос на каждый символ.
+let applyTimer = null;
+function debouncedApply() {
+    clearTimeout(applyTimer);
+    applyTimer = setTimeout(() => applyFilters(), 450);
+}
+
 function resetFilters() {
     filters.tags = [];
     filters.level = '';
@@ -216,15 +223,16 @@ onMounted(() => {
                 <template #empty>Тэгов пока нет</template>
             </MultiSelect>
             <Select v-model="filters.level" :options="levels" optionLabel="label" optionValue="value"
-                placeholder="Уровень" style="flex:1 1 130px;min-width:120px" />
+                placeholder="Уровень" style="flex:1 1 130px;min-width:120px" @change="applyFilters" />
             <InputText v-model="filters.process_uid" placeholder="Process UID" style="flex:1 1 150px;min-width:130px"
-                @keyup.enter="applyFilters" />
+                @input="debouncedApply" @keyup.enter="applyFilters" />
             <InputText v-model="filters.ident" placeholder="Польз./сессия/IP" style="flex:1 1 150px;min-width:130px"
-                @keyup.enter="applyFilters" />
+                @input="debouncedApply" @keyup.enter="applyFilters" />
             <DatePicker v-model="filters.dates" selectionMode="range" showTime hourFormat="24"
-                dateFormat="yy-mm-dd" placeholder="Период" style="flex:1 1 210px;min-width:190px" :manualInput="false" />
+                dateFormat="yy-mm-dd" placeholder="Период" style="flex:1 1 210px;min-width:190px" :manualInput="false"
+                @update:modelValue="applyFilters" />
             <InputText v-model="filters.query" placeholder="Поиск по тексту/источнику" style="flex:2 1 200px;min-width:180px"
-                @keyup.enter="applyFilters" />
+                @input="debouncedApply" @keyup.enter="applyFilters" />
         </div>
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
