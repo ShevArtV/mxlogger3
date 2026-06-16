@@ -9,6 +9,11 @@ import Select from 'primevue/select';
 import MultiSelect from 'primevue/multiselect';
 import DatePicker from 'primevue/datepicker';
 import Dialog from 'primevue/dialog';
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
 import Toast from 'primevue/toast';
 import ConfirmPopup from 'primevue/confirmpopup';
 import { useToast } from 'primevue/usetoast';
@@ -344,14 +349,22 @@ onMounted(() => {
                     </tbody>
                 </table>
 
-                <template v-if="detail.data.context_pretty">
-                    <div style="font-weight:600;color:#2f8fd6;margin-top:8px">Контекст</div>
-                    <pre style="background:#1e2329;color:#d6dee6;padding:8px;border-radius:4px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:12px">{{ detail.data.context_pretty }}</pre>
-                </template>
-                <template v-if="detail.data.trace_pretty">
-                    <div style="font-weight:600;color:#2f8fd6;margin-top:8px">Стэк и параметры</div>
-                    <pre style="background:#1e2329;color:#d6dee6;padding:8px;border-radius:4px;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:12px">{{ detail.data.trace_pretty }}</pre>
-                </template>
+                <Tabs v-if="detail.data.context_pretty || detail.data.trace_pretty" value="context">
+                    <TabList>
+                        <Tab value="context">Контекст</Tab>
+                        <Tab value="trace">Стэк и параметры</Tab>
+                    </TabList>
+                    <TabPanels>
+                        <TabPanel value="context">
+                            <pre v-if="detail.data.context_pretty" class="mxl-pre">{{ detail.data.context_pretty }}</pre>
+                            <div v-else style="color:#999;padding:8px">Нет данных</div>
+                        </TabPanel>
+                        <TabPanel value="trace">
+                            <pre v-if="detail.data.trace_pretty" class="mxl-pre">{{ detail.data.trace_pretty }}</pre>
+                            <div v-else style="color:#999;padding:8px">Нет данных</div>
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
             </div>
         </Dialog>
     </div>
@@ -364,4 +377,5 @@ onMounted(() => {
 .mxl-detail tr + tr th, .mxl-detail tr + tr td { border-top: 1px solid #eef1f4; }
 .mxl-fval { cursor: pointer; color: #2563eb; }
 .mxl-fval:hover { text-decoration: underline; }
+.mxl-pre { background: #1e2329; color: #d6dee6; padding: 8px; border-radius: 4px; max-height: 320px; overflow: auto; white-space: pre-wrap; word-break: break-word; font-size: 12px; margin: 8px 0 0; }
 </style>
