@@ -84,7 +84,6 @@ switch ($eventName) {
 
     case 'msOnBeforeCreateOrder':
         $tags = $ORDER;
-        $level = 'debug';
         $message = 'Создание заказа (до)';
         $context = $orderInfo($order);
         break;

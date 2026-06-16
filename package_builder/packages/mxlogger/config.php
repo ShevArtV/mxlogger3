@@ -25,7 +25,7 @@ return [
     'static' => [
         'chunks' => false,
         'snippets' => false,
-        'plugins' => false,
+        'plugins' => true,
     ],
 
     'encrypt' => false,
