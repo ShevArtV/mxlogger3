@@ -132,7 +132,10 @@ if (!empty($eventParams)) {
 $context['event'] = $eventName;
 
 // Воронка покупки — общий process_uid по сессии.
-$options = [];
+// trace=caller: пишем только «Источник», но НЕ аргументы метода ms3 — иначе при
+// capture_mode=full в лог попадают полный массив заказа с ПДн (имя/телефон/email/
+// адрес) и токен. Полезная сводка уже в context (скаляры order_id/num/cost).
+$options = ['trace' => 'caller'];
 $sid = session_id();
 if ($sid) {
     $options['process_uid'] = 'ms_' . substr(md5($sid), 0, 12);
