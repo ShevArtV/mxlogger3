@@ -205,6 +205,9 @@ onMounted(() => {
                 dateFormat="yy-mm-dd" placeholder="Период" style="width:230px" :manualInput="false" />
             <InputText v-model="filters.query" placeholder="Поиск по тексту/источнику" style="width:220px"
                 @keyup.enter="applyFilters" />
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
             <Button label="Показать" icon="pi pi-search" @click="applyFilters" />
             <Button label="Сброс" icon="pi pi-times" severity="secondary" outlined @click="resetFilters" />
             <span style="flex:1"></span>

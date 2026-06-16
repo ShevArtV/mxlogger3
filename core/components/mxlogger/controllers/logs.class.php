@@ -44,10 +44,17 @@ class MxloggerlogsManagerController extends modExtraManagerController
         $this->modx->regClientStartupHTMLBlock("<script>window.MxLoggerConfig = {$json};</script>");
 
         // Cache-bust по mtime бандла — каждая пересборка автоматически сбрасывает кэш.
-        $bundle = MODX_ASSETS_PATH . 'components/mxlogger/js/mgr/vue-dist/logs.min.js';
-        $ver = @filemtime($bundle) ?: $this->modx->getOption('mxlogger.version', null, '1.0.0');
+        $distPath = MODX_ASSETS_PATH . 'components/mxlogger/js/mgr/vue-dist/';
+        $distUrl = $assetsUrl . 'js/mgr/vue-dist/';
+        $ver = @filemtime($distPath . 'logs.min.js') ?: $this->modx->getOption('mxlogger.version', null, '1.0.0');
+
+        // CSS бандла (иконки PrimeIcons + прочие стили, шрифт инлайн в base64).
+        if (is_file($distPath . 'logs.min.css')) {
+            $cssVer = @filemtime($distPath . 'logs.min.css') ?: $ver;
+            $this->modx->regClientCSS($distUrl . 'logs.min.css?v=' . rawurlencode((string) $cssVer));
+        }
         $this->modx->regClientStartupHTMLBlock(
-            '<script type="module" src="' . $assetsUrl . 'js/mgr/vue-dist/logs.min.js?v=' . rawurlencode((string) $ver) . '"></script>'
+            '<script type="module" src="' . $distUrl . 'logs.min.js?v=' . rawurlencode((string) $ver) . '"></script>'
         );
     }
 
