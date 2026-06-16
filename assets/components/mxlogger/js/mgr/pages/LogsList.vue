@@ -150,6 +150,21 @@ function filterByProcess(uid) {
     applyFilters();
 }
 
+// Клик по значению в окне детали → заполнить соответствующий фильтр (как на двойке).
+function applyDetailFilter(type, value) {
+    if (value === null || value === undefined || value === '') return;
+    detail.open = false;
+    if (type === 'tag') {
+        filterByTag(String(value));
+        return;
+    }
+    if (type === 'level') filters.level = String(value);
+    else if (type === 'process') filters.process_uid = String(value);
+    else if (type === 'query') filters.query = String(value);
+    else if (type === 'ident') filters.ident = String(value);
+    applyFilters();
+}
+
 function clearLog(event) {
     const params = buildParams();
     delete params.start;
@@ -218,6 +233,7 @@ onMounted(() => {
         <DataTable :value="rows" :loading="loading" lazy paginator :rows="limit" :first="first"
             :totalRecords="total" :rowsPerPageOptions="[25, 50, 100, 200]" dataKey="id"
             :sortField="sortField" :sortOrder="sortOrder" @page="onPage" @sort="onSort"
+            @rowDblclick="(e) => openDetail(e.data)" rowHover
             removableSort size="small" stripedRows scrollable scrollHeight="flex"
             paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="{first}–{last} из {totalRecords}">
@@ -247,12 +263,12 @@ onMounted(() => {
                     </span>
                 </template>
             </Column>
-            <Column field="message" header="Сообщение">
+            <Column field="message" header="Сообщение" style="width:260px">
                 <template #body="{ data }">
                     <span style="cursor:pointer" @click="openDetail(data)">{{ data.message_short }}</span>
                 </template>
             </Column>
-            <Column header="Источник" style="width:240px">
+            <Column header="Источник" style="min-width:340px">
                 <template #body="{ data }">
                     <span style="font-family:monospace;font-size:11px">{{ data.caller }}</span><br>
                     <span style="color:#999;font-size:11px">{{ data.source }}</span>
@@ -275,17 +291,59 @@ onMounted(() => {
             :breakpoints="{ '960px': '90vw' }">
             <div v-if="detail.loading" style="padding:24px;text-align:center">Загрузка…</div>
             <div v-else-if="detail.data">
-                <div style="margin-bottom:8px">
-                    <Tag :value="detail.data.level" :severity="severity(detail.data.level)" />
-                    <Tag v-for="t in detail.data.tags_list" :key="t" :value="t" severity="secondary" style="margin-left:4px" />
-                    <span style="float:right;color:#999"><tt>{{ detail.data.createdon_formatted }}</tt></span>
-                </div>
-                <p style="font-weight:600;font-size:15px;margin:8px 0">{{ detail.data.message }}</p>
-                <div style="color:#777;font-size:12px;font-family:monospace;margin-bottom:10px">
-                    @ {{ detail.data.caller || '—' }} ({{ detail.data.source }})<br>
-                    uid={{ detail.data.process_uid }} · user={{ detail.data.username || detail.data.user_id }} ·
-                    session={{ detail.data.session_id }} · ip={{ detail.data.ip }}
-                </div>
+                <p style="font-weight:600;font-size:15px;margin:0 0 12px">{{ detail.data.message }}</p>
+
+                <table class="mxl-detail">
+                    <tbody>
+                        <tr>
+                            <th>Время</th>
+                            <td><tt>{{ detail.data.createdon_formatted }}</tt></td>
+                        </tr>
+                        <tr>
+                            <th>Уровень</th>
+                            <td>
+                                <Tag :value="detail.data.level" :severity="severity(detail.data.level)"
+                                    style="cursor:pointer" @click="applyDetailFilter('level', detail.data.level)" />
+                            </td>
+                        </tr>
+                        <tr v-if="detail.data.tags_list && detail.data.tags_list.length">
+                            <th>Тэги</th>
+                            <td>
+                                <Tag v-for="t in detail.data.tags_list" :key="t" :value="t" severity="secondary"
+                                    style="margin:1px;cursor:pointer" @click="applyDetailFilter('tag', t)" />
+                            </td>
+                        </tr>
+                        <tr v-if="detail.data.process_uid">
+                            <th>Процесс</th>
+                            <td><a class="mxl-fval" @click="applyDetailFilter('process', detail.data.process_uid)">{{ detail.data.process_uid }}</a></td>
+                        </tr>
+                        <tr v-if="detail.data.caller">
+                            <th>Источник</th>
+                            <td><a class="mxl-fval" @click="applyDetailFilter('query', detail.data.caller)">{{ detail.data.caller }}</a></td>
+                        </tr>
+                        <tr v-if="detail.data.source">
+                            <th>Файл:строка</th>
+                            <td><a class="mxl-fval" @click="applyDetailFilter('query', detail.data.source)">{{ detail.data.source }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Пользователь</th>
+                            <td>
+                                <a class="mxl-fval" @click="applyDetailFilter('ident', detail.data.username || detail.data.user_id)">
+                                    {{ detail.data.username || '—' }}<template v-if="detail.data.user_id"> (#{{ detail.data.user_id }})</template>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr v-if="detail.data.session_id">
+                            <th>Сессия</th>
+                            <td><a class="mxl-fval" @click="applyDetailFilter('ident', detail.data.session_id)">{{ detail.data.session_id }}</a></td>
+                        </tr>
+                        <tr v-if="detail.data.ip">
+                            <th>IP</th>
+                            <td><a class="mxl-fval" @click="applyDetailFilter('ident', detail.data.ip)">{{ detail.data.ip }}</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+
                 <template v-if="detail.data.context_pretty">
                     <div style="font-weight:600;color:#2f8fd6;margin-top:8px">Контекст</div>
                     <pre style="background:#1e2329;color:#d6dee6;padding:8px;border-radius:4px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:12px">{{ detail.data.context_pretty }}</pre>
@@ -298,3 +356,12 @@ onMounted(() => {
         </Dialog>
     </div>
 </template>
+
+<style>
+.mxl-detail { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 12px; }
+.mxl-detail th { text-align: left; vertical-align: top; padding: 5px 10px 5px 0; color: #6b7280; font-weight: 600; white-space: nowrap; width: 130px; }
+.mxl-detail td { padding: 5px 0; vertical-align: top; word-break: break-word; }
+.mxl-detail tr + tr th, .mxl-detail tr + tr td { border-top: 1px solid #eef1f4; }
+.mxl-fval { cursor: pointer; color: #2563eb; }
+.mxl-fval:hover { text-decoration: underline; }
+</style>
