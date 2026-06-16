@@ -1,0 +1,6 @@
+_modx2/
+tests/
+composer.lock
+phpunit.xml
+phpstan.neon
+.php-cs-fixer.php

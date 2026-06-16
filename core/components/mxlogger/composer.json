@@ -1,0 +1,16 @@
+{
+    "name": "mxlogger/mxlogger",
+    "description": "mxLogger — логирование процессов с тэгами для MODX 3",
+    "type": "modx-package",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "MxLogger\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.1"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

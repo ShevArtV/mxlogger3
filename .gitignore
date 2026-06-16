@@ -1,0 +1,11 @@
+# Собранные транспортные пакеты — не храним в git
+core/packages/*.transport.zip
+core/packages/*/
+# Зависимости фронта и IDE
+node_modules/
+.idea/
+.opencode/
+.playwright-mcp/
+# Локальные кэши инструментов
+**/.phpunit.cache/
+.php-cs-fixer.cache
