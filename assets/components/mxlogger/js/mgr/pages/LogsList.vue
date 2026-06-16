@@ -209,10 +209,10 @@ onMounted(() => {
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
             <Button label="Показать" icon="pi pi-search" @click="applyFilters" />
-            <Button label="Сброс" icon="pi pi-times" severity="secondary" outlined @click="resetFilters" />
+            <Button label="Сброс" icon="pi pi-times" severity="secondary" @click="resetFilters" />
             <span style="flex:1"></span>
-            <Button label="Обновить" icon="pi pi-refresh" severity="secondary" text @click="refresh" />
-            <Button label="Очистить журнал" icon="pi pi-trash" severity="danger" outlined @click="clearLog" />
+            <Button label="Обновить" icon="pi pi-refresh" severity="secondary" @click="refresh" />
+            <Button label="Очистить журнал" icon="pi pi-trash" severity="danger" @click="clearLog" />
         </div>
 
         <DataTable :value="rows" :loading="loading" lazy paginator :rows="limit" :first="first"
