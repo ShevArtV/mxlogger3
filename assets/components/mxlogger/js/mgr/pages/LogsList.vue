@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
@@ -128,6 +128,19 @@ function refresh() {
     loadTags();
 }
 
+// Динамическая высота: тело таблицы тянется до нижнего края окна.
+const wrapRef = ref(null);
+const scrollHeight = ref('420px');
+function recomputeHeight() {
+    nextTick(() => {
+        if (!wrapRef.value) return;
+        const dt = wrapRef.value.querySelector('.p-datatable') || wrapRef.value;
+        const top = dt.getBoundingClientRect().top;
+        // вычитаем шапку таблицы + пагинатор + нижний отступ
+        scrollHeight.value = Math.max(180, Math.floor(window.innerHeight - top - 108)) + 'px';
+    });
+}
+
 function onPage(e) {
     first.value = e.first;
     limit.value = e.rows;
@@ -208,11 +221,14 @@ function clearLog(event) {
 onMounted(() => {
     load();
     loadTags();
+    recomputeHeight();
+    window.addEventListener('resize', recomputeHeight);
 });
+onBeforeUnmount(() => window.removeEventListener('resize', recomputeHeight));
 </script>
 
 <template>
-    <div style="padding:12px">
+    <div style="padding:12px" ref="wrapRef">
         <Toast />
         <ConfirmPopup />
 
@@ -247,7 +263,7 @@ onMounted(() => {
             :totalRecords="total" :rowsPerPageOptions="[25, 50, 100, 200]" dataKey="id"
             :sortField="sortField" :sortOrder="sortOrder" @page="onPage" @sort="onSort"
             @rowDblclick="(e) => openDetail(e.data)" rowHover
-            removableSort size="small" stripedRows scrollable scrollHeight="calc(100vh - 270px)"
+            removableSort size="small" stripedRows scrollable :scrollHeight="scrollHeight"
             paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
             currentPageReportTemplate="{first}–{last} из {totalRecords}">
             <template #empty>
