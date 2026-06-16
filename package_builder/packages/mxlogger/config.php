@@ -17,6 +17,8 @@ return [
         'category' => 'mxLogger',
         'settings' => 'elements/settings.php',
         'events' => 'elements/events.php',
+        'snippets' => 'elements/snippets.php',
+        'plugins' => 'elements/plugins.php',
     ],
 
     'static' => [
