@@ -7,7 +7,7 @@ return [
         'parent' => 'components',
         'action' => 'logs',
         'namespace' => 'mxlogger',
-        'icon' => 'images/restyle/nav/icon-extras.png',
+        'icon' => '<i class="icon-list-alt icon icon-large"></i>',
         'menuindex' => 0,
         'permissions' => '',
     ],

@@ -22,8 +22,6 @@ class ComposerStaticInit570ff20e8c3724ec1770fbfdfce8c1e0
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'MxLogger\\Controllers\\Mgr\\Logs' => __DIR__ . '/../..' . '/src/Controllers/Mgr/Logs.php',
-        'MxLogger\\Controllers\\Mgr\\MxLoggerManagerController' => __DIR__ . '/../..' . '/src/Controllers/Mgr/MxLoggerManagerController.php',
         'MxLogger\\Helpers\\TagFilter' => __DIR__ . '/../..' . '/src/Helpers/TagFilter.php',
         'MxLogger\\Model\\MxLoggerLog' => __DIR__ . '/../..' . '/src/Model/MxLoggerLog.php',
         'MxLogger\\Model\\mysql\\MxLoggerLog' => __DIR__ . '/../..' . '/src/Model/mysql/MxLoggerLog.php',

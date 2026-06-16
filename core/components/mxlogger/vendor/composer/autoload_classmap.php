@@ -7,8 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'MxLogger\\Controllers\\Mgr\\Logs' => $baseDir . '/src/Controllers/Mgr/Logs.php',
-    'MxLogger\\Controllers\\Mgr\\MxLoggerManagerController' => $baseDir . '/src/Controllers/Mgr/MxLoggerManagerController.php',
     'MxLogger\\Helpers\\TagFilter' => $baseDir . '/src/Helpers/TagFilter.php',
     'MxLogger\\Model\\MxLoggerLog' => $baseDir . '/src/Model/MxLoggerLog.php',
     'MxLogger\\Model\\mysql\\MxLoggerLog' => $baseDir . '/src/Model/mysql/MxLoggerLog.php',
