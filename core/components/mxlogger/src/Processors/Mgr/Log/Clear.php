@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace MxLogger\Processors\Mgr\Log;
 
 use MxLogger\Model\MxLoggerLog;
-use MxLogger\Helpers\TagFilter;
+use MxLogger\Helpers\LogFilters;
 use MODX\Revolution\Processors\Processor;
 
 /**
  * Очистка журнала. Уважает текущие фильтры грида, если они переданы:
- *   tags (tag), tags_match, level, process_uid, user_id, date_from, date_to.
- * Без фильтров — очищает весь журнал.
+ *   tags (tag), tags_match, level, process_uid, user_id, class,
+ *   date_from, date_to, query, ident.
+ * Набор условий строится тем же построителем, что и выборка грида
+ * (LogFilters) — поэтому очистка по фильтру удаляет ровно то, что в гриде
+ * видно. Без фильтров — очищает весь журнал.
  */
 class Clear extends Processor
 {
@@ -23,37 +26,7 @@ class Clear extends Processor
         // подгрузить его до process(), и lexicon() возвращал бы голый ключ.
         $this->modx->lexicon->load('mxlogger:default');
 
-        $where = [];
-
-        $clause = TagFilter::clause(
-            $this->modx,
-            $this->getProperty('tags', $this->getProperty('tag')),
-            $this->getProperty('tags_match', 'any')
-        );
-        if ($clause !== '') {
-            $where[] = $clause;
-        }
-
-        $level = $this->getProperty('level');
-        if (!empty($level)) {
-            $where['level'] = $level;
-        }
-        $processUid = $this->getProperty('process_uid');
-        if (!empty($processUid)) {
-            $where['process_uid'] = $processUid;
-        }
-        $userId = $this->getProperty('user_id');
-        if ($userId !== null && $userId !== '') {
-            $where['user_id'] = (int) $userId;
-        }
-        $dateFrom = $this->getProperty('date_from');
-        if (!empty($dateFrom) && ($tsFrom = strtotime($dateFrom))) {
-            $where['createdon:>='] = $tsFrom;
-        }
-        $dateTo = $this->getProperty('date_to');
-        if (!empty($dateTo) && ($tsTo = strtotime($dateTo))) {
-            $where['createdon:<='] = $tsTo;
-        }
+        $where = LogFilters::build($this->modx, $this->getProperties());
 
         if (empty($where)) {
             // Полная очистка — быстрее прямым DELETE без выборки.
