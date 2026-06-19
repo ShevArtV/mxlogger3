@@ -1,5 +1,17 @@
 Changelog for mxLogger (MODX 3).
 
+mxLogger 1.0.3-pl (2026-06-19)
+==============================
+- Manager UI переведён на пакет VueTools: Vue/Pinia/PrimeVue/тема/иконки берутся
+  из общего Import Map VueTools, а не бандлятся в каждый пакет. Бандл logs.min.js
+  теперь содержит только код приложения (вес пакета упал в разы).
+- Новая зависимость: требуется установленный VueTools. При его отсутствии вместо
+  ошибок «Failed to resolve module» показывается понятный алерт (лексемы
+  mxlogger_error / mxlogger_vuetools_required).
+- Импорты PrimeVue переведены на именованные из бандла 'primevue'; контейнер
+  приложения помечен class="vueApp" для изоляции стилей PrimeVue от ExtJS.
+- Тема — штатная Aura из VueTools (отказались от собственного preset).
+
 mxLogger 1.0.2-pl (2026-06-19)
 ==============================
 - Селектор тэгов (PrimeVue MultiSelect): высота панели ограничена ~10 строками

@@ -78,3 +78,6 @@ $_lang['setting_mxlogger.log_lifetime'] = 'Срок хранения логов 
 $_lang['setting_mxlogger.log_lifetime_desc'] = 'Записи старше указанного числа секунд удаляются плагином ротации (mxLoggerRotate). 0 — не удалять.';
 $_lang['setting_mxlogger.rotate_interval'] = 'Интервал ротации (сек)';
 $_lang['setting_mxlogger.rotate_interval_desc'] = 'Как часто плагин ротации реально чистит старые записи (троттлинг). По умолчанию 3600 (раз в час).';
+
+$_lang['mxlogger_error'] = 'mxLogger';
+$_lang['mxlogger_vuetools_required'] = 'Для работы интерфейса требуется пакет VueTools. Установите его через Менеджер пакетов.';

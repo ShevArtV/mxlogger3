@@ -49,13 +49,56 @@ class MxloggerlogsManagerController extends modExtraManagerController
         $ver = @filemtime($distPath . 'logs.min.js') ?: $this->modx->getOption('mxlogger.version', null, '1.0.0');
 
         // CSS бандла (иконки PrimeIcons + прочие стили, шрифт инлайн в base64).
+        // CSS приложения (Vue/PrimeVue/тема/иконки приходят из пакета VueTools).
         if (is_file($distPath . 'logs.min.css')) {
             $cssVer = @filemtime($distPath . 'logs.min.css') ?: $ver;
             $this->modx->regClientCSS($distUrl . 'logs.min.css?v=' . rawurlencode((string) $cssVer));
         }
+
+        // Entry — ES-модуль; Vue/PrimeVue резолвятся из Import Map VueTools.
+        // Проверяем наличие карты: если VueTools не установлен — снимаем модуль
+        // и показываем понятное сообщение вместо ошибок «Failed to resolve module».
+        $this->registerVueToolsCheck();
         $this->modx->regClientStartupHTMLBlock(
-            '<script type="module" src="' . $distUrl . 'logs.min.js?v=' . rawurlencode((string) $ver) . '"></script>'
+            '<script type="module" data-vue-module src="'
+            . $distUrl . 'logs.min.js?v=' . rawurlencode((string) $ver) . '"></script>'
         );
+    }
+
+    /**
+     * Inline-проверка Import Map пакета VueTools (один раз на страницу).
+     * Нет карты с ключом vue → удаляем data-vue-module скрипты и алертим.
+     */
+    protected function registerVueToolsCheck(): void
+    {
+        $title = json_encode($this->modx->lexicon('mxlogger_error') ?: 'mxLogger', JSON_UNESCAPED_UNICODE);
+        $message = json_encode(
+            $this->modx->lexicon('mxlogger_vuetools_required')
+                ?: 'Для работы требуется пакет VueTools. Установите его через Менеджер пакетов.',
+            JSON_UNESCAPED_UNICODE
+        );
+
+        $script = <<<JS
+<script>
+(function () {
+    var map = document.querySelector('script[type="importmap"]');
+    var ok = false;
+    if (map) {
+        try { var j = JSON.parse(map.textContent); ok = !!(j.imports && j.imports.vue); } catch (e) { ok = false; }
+    }
+    if (!ok) {
+        document.querySelectorAll('script[type="module"][data-vue-module]').forEach(function (el) { el.remove(); });
+        var alertFn = function () {
+            if (typeof MODx !== 'undefined' && MODx.msg) { MODx.msg.alert({$title}, {$message}); }
+            else { alert({$message}); }
+        };
+        if (typeof Ext !== 'undefined') { Ext.onReady(alertFn); }
+        else { document.addEventListener('DOMContentLoaded', function () { setTimeout(alertFn, 500); }); }
+    }
+})();
+</script>
+JS;
+        $this->modx->regClientStartupHTMLBlock($script);
     }
 
     public function getTemplateFile()

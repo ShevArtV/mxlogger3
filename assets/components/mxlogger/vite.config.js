@@ -7,10 +7,10 @@ export default defineConfig({
     build: {
         outDir: 'js/mgr/vue-dist',
         emptyOutDir: true,
-        // Инлайнить шрифты PrimeIcons как base64 прямо в CSS — бандл самодостаточен,
-        // отдельные woff/ttf не нужны (без них иконки не рендерятся).
-        assetsInlineLimit: 4 * 1024 * 1024,
         rollupOptions: {
+            // Vue/Pinia/PrimeVue и composables приходят из Import Map пакета
+            // VueTools — НЕ бандлим их, в выхлопе остаётся только код приложения.
+            external: ['vue', 'pinia', 'primevue', /^@vuetools\//],
             input: {
                 logs: resolve(__dirname, 'js/mgr/main-logs.js'),
             },

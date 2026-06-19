@@ -1,23 +1,11 @@
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
-import MultiSelect from 'primevue/multiselect';
-import DatePicker from 'primevue/datepicker';
-import Dialog from 'primevue/dialog';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
-import Toast from 'primevue/toast';
-import ConfirmPopup from 'primevue/confirmpopup';
-import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm';
+// Все компоненты PrimeVue — именованными импортами из единого бандла VueTools.
+import {
+    DataTable, Column, Tag, Button, InputText, Select, MultiSelect, DatePicker,
+    Dialog, Tabs, TabList, Tab, TabPanels, TabPanel, Toast, ConfirmPopup,
+    useToast, useConfirm,
+} from 'primevue';
 import { LogApi } from '../api/connector.js';
 
 const toast = useToast();

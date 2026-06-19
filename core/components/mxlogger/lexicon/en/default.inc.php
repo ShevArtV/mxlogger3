@@ -78,3 +78,6 @@ $_lang['setting_mxlogger.log_lifetime'] = 'Log lifetime (sec)';
 $_lang['setting_mxlogger.log_lifetime_desc'] = 'Entries older than this number of seconds are removed by the rotation plugin (mxLoggerRotate). 0 — keep forever.';
 $_lang['setting_mxlogger.rotate_interval'] = 'Rotation interval (sec)';
 $_lang['setting_mxlogger.rotate_interval_desc'] = 'How often the rotation plugin actually purges old entries (throttling). Default 3600 (hourly).';
+
+$_lang['mxlogger_error'] = 'mxLogger';
+$_lang['mxlogger_vuetools_required'] = 'VueTools package is required for the UI. Please install it via Package Manager.';
