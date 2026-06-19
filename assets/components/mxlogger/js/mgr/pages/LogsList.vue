@@ -234,9 +234,12 @@ onBeforeUnmount(() => window.removeEventListener('resize', recomputeHeight));
 
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;width:100%">
             <MultiSelect v-model="filters.tags" :options="tagOptions" optionLabel="tag" optionValue="tag"
-                placeholder="Тэги" display="chip" filter :showToggleAll="false" :maxSelectedLabels="4"
-                :selectedItemsLabel="'{0} тэгов'" style="flex:1 1 200px;min-width:160px" @change="applyFilters">
+                placeholder="Тэги" display="chip" filter filterPlaceholder="Поиск по тэгам"
+                :showToggleAll="false" :maxSelectedLabels="4" :selectedItemsLabel="'{0} тэгов'"
+                scrollHeight="360px" :virtualScrollerOptions="{ itemSize: 36 }"
+                style="flex:1 1 200px;min-width:160px" @change="applyFilters">
                 <template #empty>Тэгов пока нет</template>
+                <template #emptyfilter>Ничего не найдено</template>
             </MultiSelect>
             <Select v-model="filters.level" :options="levels" optionLabel="label" optionValue="value"
                 placeholder="Уровень" style="flex:1 1 130px;min-width:120px" @change="applyFilters" />
