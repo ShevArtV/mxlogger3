@@ -9,3 +9,9 @@ node_modules/
 # Локальные кэши инструментов
 **/.phpunit.cache/
 .php-cs-fixer.cache
+# Composer-артефакты без внешних зависимостей: храним только автолоадер,
+# lock/installed.* регенерируются при composer install — в репо не нужны
+core/components/mxlogger/composer.lock
+core/components/mxlogger/vendor/composer/InstalledVersions.php
+core/components/mxlogger/vendor/composer/installed.json
+core/components/mxlogger/vendor/composer/installed.php
