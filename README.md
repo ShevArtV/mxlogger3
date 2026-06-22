@@ -6,7 +6,7 @@
 Компонент даёт:
 - сервис логирования с уровнями (`debug/info/warning/error`) и скоупом процесса
 - мультитэги (FULLTEXT-поиск, фильтр any/all), автозахват «Источника» и стэка
-- менеджерный грид логов (Vue 3) с фильтрами, окном детали и очисткой
+- менеджерный грид логов (Vue 3) с фильтрами, окном детали, очисткой и экспортом
 - сниппет для логирования из чанков/Fenom
 - ротацию старых записей, события до/после записи
 - логирование событий miniShop3 (корзина/заказ) готовым плагином
@@ -20,24 +20,45 @@
 - `package_builder` / `modxapp` для сборки transport package
 - miniShop3 — опционально (для плагина логирования магазина)
 
-## Доступ к сервису
+## Использование
 
-В MODX 3 сервис берётся из DI-контейнера (не `getService`/`extension_packages`):
+Самый короткий способ — фасад **`$modx->mxl`** (с версии 1.2.0). Доступен сразу
+из любого сниппета/плагина/чанка. Тот же `$modx->mxl` работает и в
+[версии под MODX 2](https://github.com/ShevArtV/mxlogger) — **API вызовов
+одинаков в обеих версиях**, отличается лишь способ получить сервис, если фасад
+недоступен (см. ниже).
 
 ```php
-$mxl = $modx->services->get('mxlogger');
-$mxl->info('purchase', 'Корзина создана', ['cart_id' => $id]);
+$modx->mxl->debug('purchase', 'Открыта корзина');
+$modx->mxl->info('purchase', 'Корзина создана', ['cart_id' => $id]);
+$modx->mxl->warning('purchase', 'Низкий остаток', ['left' => 2]);
+$modx->mxl->error('purchase', 'Платёж отклонён', ['code' => 'declined']);
 
-$p = $mxl->process(['cart', 'purchase']);   // воронка с общим process_uid
+// Несколько тэгов на одну запись:
+$modx->mxl->info(['cart', 'purchase'], 'Товар добавлен', ['product' => $pid]);
+
+// Процесс — одна воронка с общим process_uid:
+$p = $modx->mxl->process(['cart', 'purchase']);
 $p->info('Старт оплаты', ['order' => 42]);
 $p->error('Платёж отклонён', ['code' => 'declined']);
+$uid = $p->getUid();                        // можно сохранить и продолжить позже
 ```
 
 Сигнатура: `log($tags, $level, $message, array $context = [], array $options = [])`
 + шорткаты `debug/info/warning/error`. Опции: `process_uid`, `trace`
 (`caller|full|off`), `skip`, `skip_classes`.
 
-Просмотр логов: менеджер → **Extras → mxLogger**.
+Из чанка или Fenom:
+
+```
+[[!mxLogger? &tags=`cart,purchase` &level=`info` &message=`Товар добавлен`]]
+```
+
+**Если фасад недоступен** (версия ниже 1.2.0) — сервис берётся из DI-контейнера:
+`$modx->services->get('mxlogger')`.
+
+Просмотр логов: менеджер → **Extras → mxLogger**. В тулбаре грида — кнопка
+**Экспорт** (Markdown `.md` / текст `.txt`) с учётом текущих фильтров.
 
 ## Структура репозитория
 
