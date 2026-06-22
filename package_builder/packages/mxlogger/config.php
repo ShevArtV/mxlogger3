@@ -4,7 +4,7 @@ return [
     'name' => 'mxLogger',
     'name_lower' => 'mxlogger',
     'name_short' => 'mxl',
-    'version' => '1.1.0',
+    'version' => '1.2.0',
     'release' => 'pl',
     'php_version' => '8.1',
 
