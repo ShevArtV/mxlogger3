@@ -1,5 +1,20 @@
 Changelog for mxLogger (MODX 3).
 
+mxLogger 1.1.0-pl (2026-06-22)
+==============================
+- Экспорт журнала из грида с применением текущих фильтров. Кнопка «Экспорт»
+  в тулбаре (SplitButton: Markdown .md / Текст .txt) выгружает ровно те записи,
+  что видны в гриде: фильтры прогоняются через общий LogFilters (как GetList/
+  Clear). Без фильтров — весь журнал. Выгрузка включает context и trace;
+  порядок хронологический.
+- Потоковый эндпоинт assets/components/mxlogger/export.php (не процессор:
+  отдаёт файл-attachment, а не JSON). Бутстрап MODX 3 standalone, доступ
+  только авторизованному менеджеру (по сессии); выборка батчами через
+  getCollection()+toArray(), стрим в php://output.
+- Рендер вынесен в класс MxLogger\Helpers\LogExporter — тестируемая единица;
+  decodeJson корректно обрабатывает JSON-поля context/trace.
+- Порт фичи с MODX 2 версии (mxlogger 1.1.0).
+
 mxLogger 1.0.3-pl (2026-06-19)
 ==============================
 - Manager UI переведён на пакет VueTools: Vue/Pinia/PrimeVue/тема/иконки берутся

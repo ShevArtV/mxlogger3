@@ -29,10 +29,25 @@ async function request(action, params = {}) {
 
 const P = 'MxLogger\\Processors\\Mgr\\Log\\';
 
+// Экспорт — не fetch, а навигация на потоковый эндпоинт export.php
+// (отдаёт файл-attachment). Авторизация — по сессии менеджера.
+function exportUrl(params = {}, format = 'md') {
+    const config = cfg();
+    const qs = new URLSearchParams();
+    qs.set('format', format === 'txt' ? 'txt' : 'md');
+    for (const [k, v] of Object.entries(params)) {
+        if (v !== null && v !== undefined && v !== '') {
+            qs.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+        }
+    }
+    return (config.assets_url || '') + 'export.php?' + qs.toString();
+}
+
 export const LogApi = {
     getList: (params) => request(P + 'GetList', params),
     get: (id) => request(P + 'Get', { id }),
     getTags: (query) => request(P + 'GetTags', { query: query || '' }),
     remove: (id) => request(P + 'Remove', { id }),
     clear: (params) => request(P + 'Clear', params),
+    exportUrl,
 };

@@ -49,6 +49,13 @@ $_lang['mxlogger_btn_clear'] = 'Clear';
 $_lang['mxlogger_log_clear_confirm'] = 'Delete journal entries matching the current filter? This cannot be undone.';
 $_lang['mxlogger_log_cleared'] = 'Entries removed: [[+count]].';
 
+/* Export — file header */
+$_lang['mxlogger_export_title'] = 'mxLogger — journal export';
+$_lang['mxlogger_export_date'] = 'Exported at';
+$_lang['mxlogger_export_filter'] = 'Filter';
+$_lang['mxlogger_export_count'] = 'Entries';
+$_lang['mxlogger_export_nofilter'] = 'none (entire journal)';
+
 /* Settings */
 $_lang['setting_mxlogger.enabled'] = 'Enable logging';
 $_lang['setting_mxlogger.enabled_desc'] = 'Global switch for writing logs.';

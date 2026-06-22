@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from 'vue';
 // Все компоненты PrimeVue — именованными импортами из единого бандла VueTools.
 import {
-    DataTable, Column, Tag, Button, InputText, Select, MultiSelect, DatePicker,
+    DataTable, Column, Tag, Button, SplitButton, InputText, Select, MultiSelect, DatePicker,
     Dialog, Tabs, TabList, Tab, TabPanels, TabPanel, Toast, ConfirmPopup,
     useToast, useConfirm,
 } from 'primevue';
@@ -178,6 +178,25 @@ function applyDetailFilter(type, value) {
     applyFilters();
 }
 
+// Те же фильтры, что в гриде, без параметров пагинации/сортировки.
+function filterParams() {
+    const params = buildParams();
+    delete params.start;
+    delete params.limit;
+    delete params.sort;
+    delete params.dir;
+    return params;
+}
+
+// Экспорт журнала с текущими фильтрами — навигация на export.php (скачивание файла).
+const exportItems = [
+    { label: 'Markdown (.md)', icon: 'pi pi-file', command: () => exportLog('md') },
+    { label: 'Текст (.txt)', icon: 'pi pi-file-edit', command: () => exportLog('txt') },
+];
+function exportLog(format) {
+    window.location.href = LogApi.exportUrl(filterParams(), format);
+}
+
 function clearLog(event) {
     const params = buildParams();
     delete params.start;
@@ -246,6 +265,8 @@ onBeforeUnmount(() => window.removeEventListener('resize', recomputeHeight));
             <Button label="Показать" icon="pi pi-search" raised @click="applyFilters" />
             <Button label="Сброс" icon="pi pi-times" severity="secondary" raised @click="resetFilters" />
             <span style="flex:1"></span>
+            <SplitButton label="Экспорт" icon="pi pi-download" severity="info" raised
+                :model="exportItems" @click="exportLog('md')" />
             <Button label="Обновить" icon="pi pi-refresh" severity="secondary" raised @click="refresh" />
             <Button label="Очистить журнал" icon="pi pi-trash" severity="danger" raised @click="clearLog" />
         </div>

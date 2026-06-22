@@ -49,6 +49,13 @@ $_lang['mxlogger_btn_clear'] = 'Очистить';
 $_lang['mxlogger_log_clear_confirm'] = 'Удалить записи журнала по текущему фильтру? Действие необратимо.';
 $_lang['mxlogger_log_cleared'] = 'Удалено записей: [[+count]].';
 
+/* Экспорт — шапка файла */
+$_lang['mxlogger_export_title'] = 'mxLogger — экспорт журнала';
+$_lang['mxlogger_export_date'] = 'Дата экспорта';
+$_lang['mxlogger_export_filter'] = 'Фильтр';
+$_lang['mxlogger_export_count'] = 'Записей';
+$_lang['mxlogger_export_nofilter'] = 'не задан (весь журнал)';
+
 /* Настройки */
 $_lang['setting_mxlogger.enabled'] = 'Включить логирование';
 $_lang['setting_mxlogger.enabled_desc'] = 'Глобальный выключатель записи логов.';
